@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <title>RAND</title>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+        <meta name="viewport" content="user-scalable=yes, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+        <link rel="stylesheet" type="text/css" href="../css/reset.css"/>
+        <link rel="stylesheet" type="text/css" href="../css/common.css"/>
+        <link rel="stylesheet" type="text/css" href="../css/style.css"/>
+
+        <script src="../js/jquery-2.2.4.min.js"></script>
+        <script src="../js/script.js"></script>
+
+        <!-- swiper slide -->
+        <link rel="stylesheet" href="../css/swiper-bundle.min.css" />
+        <script src="../js/swiper-bundle.min.js"></script>
+    </head>
+    <body>
+
+        <div class="popup__text" id="popup1" stye="display:none;">
+            <div class="cont">
+                <button class="btn-popuptext-close">
+                    <img src="../img/common/close.png" alt="closs">
+                </button>
+                <h2>제목을 여기 입력하세요</h2>
+                <div style="overflow:auto; height:calc(100% - 130px); margin-top:20px;">
+                    <img src="../img/events/events1.png" alt="" style="width:100%;">
+                    <img src="../img/events/events1.png" alt="" style="width:100%;">
+                    <img src="../img/events/events1.png" alt="" style="width:100%;">
+                    <img src="../img/events/events1.png" alt="" style="width:100%;">
+                    <img src="../img/events/events1.png" alt="" style="width:100%;">
+                    <img src="../img/events/events1.png" alt="" style="width:100%;">
+                </div>
+                
+                <button class="btn-todayclose">오늘 하루 열지 않기</button>
+            </div>
+            <div class="bg"></div>
+        </div>
+
+        <script>
+            /* cookie */
+            function setCookie(name, value, expiredays) {
+                var todayDate = new Date();
+                todayDate.setDate(todayDate.getDate() + expiredays);
+                document.cookie = name + "=" + escape(value) + "; path=/; expires=" + todayDate.toGMTString() + ";";
+            }
+            
+            function getCookie(name) {
+                var cookieData = document.cookie;
+                var start = cookieData.indexOf(name + '=');
+                var cookieValue = '';
+                
+                if(start != -1) {
+                    start += name.length + 1;
+                    var end = cookieData.indexOf(';', start);
+                    if(end == -1) end = cookieData.length;
+                    cookieValue = cookieData.substring(start, end);
+                }
+                
+                return unescape(cookieValue);
+            }
+            
+            // DOM이 완전히 로드된 후 실행
+            $(document).ready(function(){
+                if( $('.popup__text').length == 0 ) return;
+
+                // 쿠키 체크
+                var popupCookie = getCookie("popupYN");
+                if(popupCookie != "N") {
+                    $('.popup__text').show();
+                }else{
+                    $('.popup__text').hide();
+                }
+                
+                // 일반 닫기 버튼 클릭 이벤트
+                $('.popup__text').on('click', function(){
+                    $('.popup__text').hide();
+                });
+                
+                // 오늘 하루 열지 않기 버튼 클릭 이벤트
+                $('.btn-todayclose').on('click', function(){
+                    setCookie("popupYN", "N", 1);
+                    $('.popup__text').hide();
+                    console.log("쿠키 설정됨: " + document.cookie); // 디버깅용
+                });
+            });
+        </script>
+    </body>
+</html>
