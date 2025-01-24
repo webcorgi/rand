@@ -15,7 +15,6 @@ $(function () {
     mainMsgMore()
     visualAnimation1()
     wheelanimation()
-    mainMultiPopup()
 })
 
 function visualAnimation1(){
@@ -321,204 +320,172 @@ function popupBasicClose(){
     $('.popup__basic').hide()
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+    const popupManager = {
+        imagePopups: Array.from(document.querySelectorAll('.popup__image__cont')),
+        textPopupContainer: document.querySelector('.popup__text__cont__container'),
+        textPopups: Array.from(document.querySelectorAll('.popup__text__cont')),
+        popupContainer: document.querySelector('.popup__container'),
+        maxVisiblePopups: window.innerWidth > 991 ? 3 : 1,
+        activeImagePopups: [],
+        activeTextPopups: [],
+        isTextPopupPhase: false,
 
-function mainMultiPopup(){
-    // DOM 요소 선택
-    const popupContainer = document.getElementById('popup1');
-    const popupContents = document.querySelectorAll('.popup__text__cont, .popup__image__cont');
-    const closeButtons = document.querySelectorAll('.popup-close');
-    const todayCloseButtons = document.querySelectorAll('.btn-todayclose');
-    const background = document.querySelector('.bg');
-    const body = document.querySelector('body');
+        init() {
+            // 초기화 순서 변경
+            this.bindEvents();
+            this.checkCookieStatus();
+            this.showInitialPopups();
+        },
 
-    // 팝업 상태 관리
-    let popupQueue = [];
-    let activePopups = new Set();
+        checkCookieStatus() {
+            this.imagePopups.forEach(popup => {
+                const popupId = popup.dataset.popupId;
+                if (popupId && this.getCookie(`popup_${popupId}`) === 'closed') {
+                    popup.style.display = 'none';
+                    popup.classList.add('closed');
+                }
+            });
 
-    // 화면 크기에 따른 최대 팝업 개수 설정
-    const getMaxVisiblePopups = () => {
-        return window.innerWidth >= 1023 ? 3 : 1;
-    };
+            this.textPopups.forEach(popup => {
+                const popupId = popup.dataset.popupId;
+                if (popupId && this.getCookie(`popup_${popupId}`) === 'closed') {
+                    popup.style.display = 'none';
+                    popup.classList.add('closed');
+                }
+            });
 
-    // 쿠키 관련 유틸리티 함수들
-    const createCookie = (name, value, days) => {
-        let expires = '';
-        if (days) {
+            const allImagesClosed = this.imagePopups.every(popup => popup.classList.contains('closed'));
+            if (allImagesClosed) {
+                this.isTextPopupPhase = true;
+                if (this.textPopups.every(popup => popup.classList.contains('closed'))) {
+                    this.closeAllPopups();
+                }
+            }
+        },
+
+        setCookie(name, value, days) {
             const date = new Date();
             date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-            expires = `; expires=${date.toGMTString()}`;
-        }
-        document.cookie = `${name}=${value}${expires}; path=/`;
-    };
+            document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
+        },
 
-    const readCookie = (name) => {
-        const nameEQ = `${name}=`;
-        const ca = document.cookie.split(';');
-        for (let i = 0; i < ca.length; i++) {
-            let c = ca[i];
-            while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-        }
-        return null;
-    };
+        getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) {
+                return parts.pop().split(';').shift();
+            }
+            return null;
+        },
 
-    // 팝업 초기화
-    const initializePopupQueue = () => {
-        popupQueue = [];
-        activePopups.clear();
+        bindEvents() {
+            // 이벤트 위임을 사용하여 팝업 컨테이너에 이벤트 리스너 추가
+            this.popupContainer.addEventListener('click', (e) => {
+                // 닫기 버튼 클릭 처리
+                if (e.target.closest('.popup-close')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const popup = e.target.closest('.popup__image__cont, .popup__text__cont');
+                    if (popup) {
+                        this.handlePopupClose(popup);
+                    }
+                }
+                
+                // 오늘 하루 닫기 버튼 클릭 처리
+                if (e.target.closest('.btn-todayclose')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const popup = e.target.closest('.popup__image__cont, .popup__text__cont');
+                    if (popup) {
+                        this.handleTodayClose(popup);
+                    }
+                }
+            });
 
-        // 화면 크기에 따른 초기 표시 개수 설정
-        const maxVisible = getMaxVisiblePopups();
-        popupContents.forEach((popup, index) => {
-            const popupId = `popup_${index + 1}`;
-            if (!readCookie(popupId)) {
-                if (index < maxVisible) {
-                    // 초기에 표시될 팝업
-                    popup.style.display = 'block';
-                    activePopups.add(index);
-                } else {
-                    // 대기 큐에 추가될 팝업
-                    popup.style.display = 'none';
-                    popupQueue.push({
-                        element: popup,
-                        index: index,
-                        type: popup.classList.contains('popup__text__cont') ? 'text' : 'image'
-                    });
+            // 리사이즈 이벤트
+            window.addEventListener('resize', () => {
+                const newMaxVisible = window.innerWidth > 991 ? 3 : 1;
+                if (newMaxVisible !== this.maxVisiblePopups) {
+                    this.maxVisiblePopups = newMaxVisible;
+                    this.updateVisiblePopups();
+                }
+            });
+        },
+
+        showInitialPopups() {
+            const hasVisiblePopups = this.imagePopups.some(popup => !popup.classList.contains('closed')) ||
+                                   this.textPopups.some(popup => !popup.classList.contains('closed'));
+            
+            if (!hasVisiblePopups) {
+                this.popupContainer.style.display = 'none';
+                return;
+            }
+            
+            this.popupContainer.style.display = 'flex';
+            this.updateVisiblePopups();
+        },
+
+        updateVisiblePopups() {
+            if (!this.isTextPopupPhase) {
+                const remainingImages = this.imagePopups.filter(popup => !popup.classList.contains('closed'));
+                this.activeImagePopups = remainingImages.slice(0, this.maxVisiblePopups);
+                
+                this.imagePopups.forEach(popup => {
+                    popup.style.display = this.activeImagePopups.includes(popup) ? 'block' : 'none';
+                });
+
+                if (remainingImages.length === 0) {
+                    this.isTextPopupPhase = true;
+                    this.showTextPopups();
                 }
             } else {
-                popup.style.display = 'none';
+                this.showTextPopups();
             }
-        });
+        },
 
-        // 표시될 팝업이 있는 경우 컨테이너 표시
-        if (activePopups.size > 0) {
-            popupContainer.style.display = 'flex';
-            body.style.overflow = 'hidden';
-            background.style.display = 'block';
-        }
-    };
-
-    // 다음 사용 가능한 팝업 표시
-    const showNextAvailablePopup = () => {
-        if (popupQueue.length > 0) {
-            const nextPopup = popupQueue.shift();
-            if (nextPopup) {
-                nextPopup.element.style.display = 'block';
-                activePopups.add(nextPopup.index);
-                updateContainerState();
-            }
-        } else {
-            // 더 이상 표시할 팝업이 없으면 컨테이너 숨김
-            popupContainer.style.display = 'none';
-            body.style.overflow = 'auto';
-            background.style.display = 'none';
-        }
-    };
-
-    // 다음 팝업 표시 (PC용)
-    const showNextPopup = () => {
-        const maxVisible = getMaxVisiblePopups();
-        while (activePopups.size < maxVisible && popupQueue.length > 0) {
-            const nextPopup = popupQueue.shift();
-            if (nextPopup) {
-                nextPopup.element.style.display = 'block';
-                activePopups.add(nextPopup.index);
-            }
-        }
-
-        updateContainerState();
-    };
-
-    // 컨테이너 상태 업데이트
-    const updateContainerState = () => {
-        const hasVisiblePopups = activePopups.size > 0;
-        popupContainer.style.display = hasVisiblePopups ? 'flex' : 'none';
-        body.style.overflow = hasVisiblePopups ? 'hidden' : 'auto';
-        background.style.display = hasVisiblePopups ? 'flex' : 'none';
-    };
-
-    // 팝업 닫기 처리
-    const closePopup = (popupContent, withCookie = false) => {
-        const popupIndex = Array.from(popupContents).indexOf(popupContent);
-        const popupId = `popup_${popupIndex + 1}`;
-        
-        // 팝업 숨기기
-        popupContent.style.display = 'none';
-        activePopups.delete(popupIndex);
-        
-        if (withCookie) {
-            createCookie(popupId, 'true', 1);
-        }
-
-        // 모바일에서는 한 번에 하나의 팝업만 표시
-        if (window.innerWidth < 768) {
-            showNextAvailablePopup();
-        } else {
-            // PC에서는 여러 팝업 동시 표시 가능
-            showNextPopup();
-        }
-        
-        updateContainerState();
-    };
-
-    // 클릭 이벤트 핸들러
-    const handleClose = (event) => {
-        const target = event.target;
-        const button = target.tagName.toLowerCase() === 'button' ? target : target.closest('button');
-        if (!button) return;
-
-        const popupContent = button.closest('.popup__text__cont, .popup__image__cont');
-        if (!popupContent) return;
-
-        const isTodayClose = button.classList.contains('btn-todayclose');
-        closePopup(popupContent, isTodayClose);
-    };
-
-    // 화면 크기 변경에 따른 팝업 재조정
-    const adjustPopupsOnResize = () => {
-        const maxVisible = getMaxVisiblePopups();
-        const currentVisible = activePopups.size;
-
-        if (currentVisible > maxVisible) {
-            // 초과하는 팝업을 큐로 되돌리기
-            const activePopupArray = Array.from(activePopups);
-            for (let i = maxVisible; i < currentVisible; i++) {
-                const popupIndex = activePopupArray[i];
-                const popup = popupContents[popupIndex];
-                popup.style.display = 'none';
-                activePopups.delete(popupIndex);
-                popupQueue.unshift({
-                    element: popup,
-                    index: popupIndex,
-                    type: popup.classList.contains('popup__text__cont') ? 'text' : 'image'
+        showTextPopups() {
+            if (this.textPopupContainer && this.textPopups.length > 0) {
+                this.textPopupContainer.style.display = 'block';
+                
+                const remainingTexts = this.textPopups.filter(popup => !popup.classList.contains('closed'));
+                this.activeTextPopups = remainingTexts.slice(0, this.maxVisiblePopups);
+                
+                this.textPopups.forEach(popup => {
+                    popup.style.display = this.activeTextPopups.includes(popup) ? 'block' : 'none';
                 });
-            }
-        } else if (currentVisible < maxVisible) {
-            // 추가로 표시할 수 있는 팝업 표시
-            showNextPopup();
-        }
 
-        updateContainerState();
+                if (remainingTexts.length === 0) {
+                    this.closeAllPopups();
+                }
+            } else {
+                this.closeAllPopups();
+            }
+        },
+
+        handlePopupClose(popup) {
+            if (!popup || popup.classList.contains('closed')) return;
+            
+            popup.classList.add('closed');
+            popup.style.display = 'none';
+            this.updateVisiblePopups();
+        },
+
+        handleTodayClose(popup) {
+            if (!popup || popup.classList.contains('closed')) return;
+            
+            const popupId = popup.dataset.popupId;
+            if (popupId) {
+                this.setCookie(`popup_${popupId}`, 'closed', 1);
+            }
+            this.handlePopupClose(popup);
+        },
+
+        closeAllPopups() {
+            this.popupContainer.style.display = 'none';
+        }
     };
 
-    // 이벤트 리스너 등록
-    popupContainer.addEventListener('click', (event) => {
-        const target = event.target;
-        
-        // 닫기 버튼 클릭 처리
-        if (target.closest('.popup-close')) {
-            handleClose(event);
-        }
-        
-        // 오늘 하루 열지 않음 버튼 클릭 처리
-        if (target.closest('.btn-todayclose')) {
-            handleClose(event);
-        }
-    });
-
-    // 화면 크기 변경 시 팝업 개수 조정
-    window.addEventListener('resize', adjustPopupsOnResize);
-
-    // 초기 팝업 설정 및 표시
-    initializePopupQueue();
-}
+    // 팝업 매니저 초기화
+    popupManager.init();
+});

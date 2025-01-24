@@ -863,6 +863,17 @@ footer {
 .popup__image__cont {
     display: none;
 }
+.popup__text__cont__container {
+    display:none;
+}
+.popup__text__cont__container {
+    position:relative;
+    width:400px;
+    height:550px;
+}
+.popup__text__cont__container .popup__text__cont {
+    position:absolute;
+}
 
 /* PC 화면에서 처음 3개 팝업만 표시 */
 .popup__text__cont:nth-child(-n+3),
@@ -872,6 +883,7 @@ footer {
 
 /* 모바일 화면에서 첫 번째 팝업만 표시 */
 @media screen and (max-width: 1240px) {
+    .popup__text__cont__container,
     .popup__text__cont,
     .popup__image__cont {
         max-width:300px !important;
