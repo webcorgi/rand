@@ -25,7 +25,7 @@ html {
 
 body {
     background: #100429;
-    overflow-x: hidden;
+    /* overflow-x: hidden; */
     display: flex;
     justify-content: flex-start;
     align-items: flex-start;
@@ -338,7 +338,7 @@ nav.active {
 .gamescategory .list a span {
     text-transform: uppercase;
     font-weight: 700;
-    font-size: 10px;
+    font-size: 14px;
     letter-spacing: 1px;
 }
 .select__fake {
@@ -381,11 +381,11 @@ nav.active {
     margin-right: 10px;
 }
 .select__fake .select__fake-name {
-    font-size: 12px;
+    font-size: 14px;
 }
 
 nav .linkbox {
-    gap: 10px;
+    gap: 10px 5px;
     display: flex;  
     justify-content: center;
     align-items: center;
@@ -395,22 +395,23 @@ nav .linkbox a {
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    height: 40px;
+    height: 35px;
     border: 1px solid #9E32C2;
     border-radius: 100px;
-    width: calc(50% - 5px);
-    padding: 0 10px;
+    width: 100%;
+    padding: 0 0 0 10px;
 }
 nav .linkbox a img {
     max-width: 25px;
 }
 nav .linkbox a span {
-    font-size: 10px;
+    font-size: 14px;
     font-weight: 800;
     text-transform: uppercase;
     text-shadow: var(--textShadow);
     width: 100%;
-    text-align: center;
+    text-align: left;
+    padding-left:10px;
 }
 nav .linkbox a span.othersize {
     font-size: 8px;
@@ -568,7 +569,6 @@ nav .linkbox a span.othersize {
 }
 .main__visualslider .swiper-slide {
     position: relative;
-    height: 360px;
 }
 .btn-visual-join {
     width: 260px;
@@ -1667,6 +1667,19 @@ input[type="checkbox"] {
     height: calc(100vh - 310px);
     overflow: auto;
 }
+
+.popup.member {
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:100;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
 .popup .bg {
     position: absolute;
     top: 0;
@@ -1830,6 +1843,7 @@ input[type="checkbox"] {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    z-index: 100;
 }
 .popup.member .cont .text {
     margin-right: 20px;
@@ -1975,6 +1989,7 @@ input[type="checkbox"] {
     display: flex;
     justify-content: space-between;
     align-items: stretch;
+    gap:20px;
     margin-top: 50px;
     position: relative;
 }
@@ -1995,15 +2010,18 @@ input[type="checkbox"] {
     width: 100%;
     max-width: 333px;
     min-height: 360px;
+    box-shadow:0 6px 12px 2px #400E4D;
+    border: 2px solid #9E32C2;
+    border-radius:10px;
 }
 .main__ranking .item.slots {
-    background: url(../img/main/ranking_bg1.png) 50% /contain no-repeat;
+    background: url(../img/main/ranking_bg1.jpg) 50% /cover no-repeat;
 }
 .main__ranking .item.baccarat {
-    background: url(../img/main/ranking_bg1.png) 50% /contain no-repeat
+    background: url(../img/main/ranking_bg1.jpg) 50% /cover no-repeat
 }
 .main__ranking .item.deposit {
-    background: url(../img/main/ranking_bg1.png) 50% /contain no-repeat
+    background: url(../img/main/ranking_bg1.jpg) 50% /cover no-repeat
 }
 
 .main__ranking .item h2 {
@@ -2017,6 +2035,8 @@ input[type="checkbox"] {
     border: 2px solid #9E32C2;
     font-size: 18px;
     margin: 0 auto;
+    position:relative;
+    top:-20px;
 }
 .main__ranking .item .left {
     display: flex;
@@ -2441,6 +2461,12 @@ select {
 
 
 
+.main__visualslider .pc {
+    display:block;
+}
+.main__visualslider .mo {
+    display:none;
+}
 
 /* response */
 @media screen and (max-width:1400px){
@@ -2472,7 +2498,6 @@ select {
         order: 1;
     }
     .main__visualslider .swiper-slide {
-        height: 490px;
     }
 }
 
@@ -2531,8 +2556,8 @@ select {
         max-width:100%;
         margin-bottom: 40px;
     }
-    .main__visualslider .swiper-slide {
-        height: 390px;
+    .main__visualslider {
+        margin-top:100px;
     }
     .main__visualslider .swiper-slide-item .left, .main__visualslider .swiper-slide-item .visual-item {
         max-width: 340px;
@@ -2540,9 +2565,12 @@ select {
     .main__company {
         gap: 5px;
     }
+    .main__ranking .item{
+        min-height:260px;
+    }
     .main__ranking .item ul {
-        padding: 0 45px;
-        margin-top: 30px;
+        padding: 0 25px;
+        margin-top: 0;
     }
     .main__ranking .item .left .profile {
         width: 25px;
@@ -2551,6 +2579,10 @@ select {
     .main__ranking .item ul li{
         margin-top: 15px;
     }
+    .main__ranking .item ul li:nth-child(3n+1){
+        display:none;
+    }
+
     .main__ranking .deco-left, .main__ranking .deco-right {
         max-height: 100px;
         bottom: 0;
@@ -2659,7 +2691,7 @@ select {
     }
 
     header{
-        height: 44px;
+        height: 64px;
         padding-right: 10px;
         max-width: 100%;
         margin: 0;
@@ -2668,7 +2700,8 @@ select {
     .header__right__aside{
         height: auto;
         padding: 0 10px;
-        gap: 2px;
+        gap: 10px;
+        background:none;
     }
     .img-polygondown {
         width: 9px;
@@ -2677,7 +2710,7 @@ select {
         display: none;
     }
     header h1 .header-logo img{
-        height: 35px;
+        height: 55px;
     }
     .aside__alarm img {
         width: 28px;
@@ -2704,7 +2737,7 @@ select {
     }
     nav {
         display: none;
-        top: 44px;
+        top: 64px;
     }
     nav.active {
         display: block;
@@ -2721,9 +2754,6 @@ select {
         font-size: 14px;
     }
     .main__games {
-        white-space: nowrap;
-        overflow-x:auto;
-        width:100%;
     }
     .main__games a{
         min-width: 200px;
@@ -2946,10 +2976,10 @@ select {
         top: 20px;
     }
     nav {
-        height: calc(100vh - 107px);
+        height: calc(100vh - 127px);
     }
     nav.active a span{
-        font-size: 10px;
+        font-size: 12px !important;
     }
     nav.active{
         overflow: auto;
@@ -2972,8 +3002,17 @@ select {
 
     .header__right__aside .btn-member{
         width: 60px;
-        height: 20px;
-        font-size: 10px;
+        height: 40px;
+        font-size: 12px;
+    }
+    .main__visualslider {
+        margin-top:80px;
+    }
+    .main__visualslider .pc {
+        display:none;
+    }
+    .main__visualslider .mo {
+        display:block;
     }
     .main__visualslider .swiper-slide-item .left{
         position: absolute;
@@ -2999,7 +3038,9 @@ select {
         margin-bottom: 20px;
     }
     .main__visualslider .swiper-slide {
-        height: 340px;
+        overflow: hidden;
+        border-radius:20px;
+        height:auto;
     }
     .swiper-button-next,
     .swiper-button-prev {
@@ -3040,13 +3081,17 @@ select {
     .main__ranking .item h2{
         height: 32px;
         font-size: 14px;
+        position:relative;
+        top:-15px;
     }
     .main__ranking .item {
-        min-height: 330px;
-        margin: 0 auto;
+        min-height: 200px;
+        margin: 0 auto 40px;
+        border:1px solid #9E32C2;
+        border-radius:10px;
     }
     .main__ranking .deco-left, .main__ranking .deco-right{
-        bottom: -20px;
+        bottom: -40px;
     }
     .main__msg h2 img, .main__why h2 img {
         height: 12px;

@@ -72,5 +72,5 @@ select {
     appearance:none /* 화살표 없애기 */
 }
 body {
-	overflow-x: hidden;
+	/* overflow-x: hidden; */
 }

@@ -1,5 +1,6 @@
 $(function () {
     mainVisualSlider()
+    mainGamesSlider()
     mainLivecasinoSlider()
     mainLiveSlotsSlider()
     clickNav()
@@ -50,7 +51,7 @@ function mainVisualSlider() {
     var swiper = new Swiper(".main__visualslider", {
         slidesPerView: 1,
         autoplay:{
-            delay: 3000,
+            delay: 300000,
         },
         loop:true,
         pagination: {
@@ -60,6 +61,31 @@ function mainVisualSlider() {
         },
     });
 }
+
+function mainGamesSlider() {
+    var swiper = new Swiper(".main__gamesslider", {
+        slidesPerView: 3,
+        spaceBetween: 20,
+        autoplay:{
+            delay: 3000,
+        },
+        loop:true,
+        breakpoints:{
+            1024:{
+                slidesPerView:3,
+                spaceBetween: 20,
+            },
+            767:{
+                spaceBetween:15,
+            },
+            320:{
+                slidesPerView:2,
+                spaceBetween:10,
+            }
+        },
+    });
+}
+
 
 function mainLivecasinoSlider() {
     var swiper = new Swiper(".main__livecasinoslider", {
