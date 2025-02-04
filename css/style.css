@@ -2756,7 +2756,7 @@ select {
     .main__games {
     }
     .main__games a{
-        min-width: 200px;
+        /* min-width: 200px; */
     }
     .main__merit{
         gap: 10px;
